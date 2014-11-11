@@ -655,6 +655,11 @@ static void relocate_section(TCCState *s1, Section *s)
             fprintf(stderr,"FIXME: handle reloc type %x at %lx [%.8x] to %lx\n",
                     type,addr,(unsigned int )ptr,val);
             break;
+#elif defined(TCC_TARGET_MSP430)
+        default:
+            fprintf(stderr,"FIXME: handle reloc type %x at %lx [%.8x] to %lx\n",
+                    type,addr,(unsigned int )ptr,val);
+            break;
 #elif defined(TCC_TARGET_X86_64)
         case R_X86_64_64:
             if (s1->output_type == TCC_OUTPUT_DLL) {
@@ -968,6 +973,8 @@ static void put_got_entry(TCCState *s1,
         }
 #elif defined(TCC_TARGET_C67)
         error("C67 got not implemented");
+#elif defined(TCC_TARGET_MSP430)
+        error("MSP430 got not implemented");
 #else
 #error unsupported CPU
 #endif
@@ -1024,6 +1031,25 @@ static void build_got_entries(TCCState *s1)
                 }
                 break;
 #elif defined(TCC_TARGET_ARM)
+            case R_ARM_GOT_BREL:
+            case R_ARM_GOTOFF32:
+            case R_ARM_BASE_PREL:
+            case R_ARM_PLT32:
+                if (!s1->got)
+                    build_got(s1);
+                if (type == R_ARM_GOT_BREL || type == R_ARM_PLT32) {
+                    sym_index = ELFW(R_SYM)(rel->r_info);
+                    sym = &((ElfW(Sym) *)symtab_section->data)[sym_index];
+                    /* look at the symbol got offset. If none, then add one */
+                    if (type == R_ARM_GOT_BREL)
+                        reloc_type = R_ARM_GLOB_DAT;
+                    else
+                        reloc_type = R_ARM_JUMP_SLOT;
+                    put_got_entry(s1, reloc_type, sym->st_size, sym->st_info, 
+                                  sym_index);
+                }
+                break;
+#elif defined(TCC_TARGET_MSP430)
             case R_ARM_GOT_BREL:
             case R_ARM_GOTOFF32:
             case R_ARM_BASE_PREL:
@@ -1781,6 +1807,8 @@ int elf_output_file(TCCState *s1, const char *filename)
                     }
 #elif defined(TCC_TARGET_C67)
                     /* XXX: TODO */
+#elif defined(TCC_TARGET_MSP430)
+                    /* XXX: TODO */
 #else
 #error unsupported CPU
 #endif
@@ -1914,6 +1942,9 @@ int elf_output_file(TCCState *s1, const char *filename)
         ehdr.e_ident[6] = EV_CURRENT;
 #ifdef __FreeBSD__
         ehdr.e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+#endif
+#ifdef TCC_TARGET_MSP430
+        ehdr.e_ident[EI_OSABI] = ELFOSABI_STANDALONE;
 #endif
 #ifdef TCC_TARGET_ARM
 #ifdef TCC_ARM_EABI
@@ -2644,7 +2675,7 @@ static int ld_next(TCCState *s1, char *name, int name_size)
         inp();
         break;
     }
-#if 0
+#if 1
     printf("tok=%c %d\n", c, c);
     if (c == LD_TOK_NAME)
         printf("  name=%s\n", name);

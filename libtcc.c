@@ -243,6 +243,10 @@ static void asm_global_instr(void);
 #include "arm-gen.c"
 #endif
 
+#ifdef TCC_TARGET_MSP430
+#include "msp430-gen.c"
+#endif
+
 #ifdef TCC_TARGET_C67
 #include "c67-gen.c"
 #endif

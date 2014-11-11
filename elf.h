@@ -250,6 +250,7 @@ typedef struct
 #define EM_ARC_A5       93              /* ARC Cores Tangent-A5 */
 #define EM_XTENSA       94              /* Tensilica Xtensa Architecture */
 #define EM_NUM          95
+#define EM_MSP430	105
 
 /* If it is necessary to assign new unofficial EM_* values, please
    pick large random numbers (0x8523, 0xa7f2, etc.) to minimize the
@@ -1055,6 +1056,17 @@ typedef struct
 #define R_X86_64_TPOFF32	23	/* Offset in initial TLS block */
 
 #define R_X86_64_NUM		24
+
+/* MSP430 relocations */
+#define R_MSP430_NONE		0x00
+#define R_MSP430_32		0x02
+#define R_MSP430_16		0x01
+#define R_MSP430_16_BYTE	0x01
+#define R_MSP430_10_PCREL	0x11 /* rightshift 1 */
+#define R_MSP430_16_PCREL	0x11 /* rightshift 1 */
+#define R_MSP430_16_PCREL_BYTE	0x11 /* rightshift 1 */
+#define R_MSP430_2X_PCREL	0x12 /* rightshift 1 */
+#define R_MSP430_RL_PCREL	0x11 /* rightshift 1 */
 
 /* For Sparc64, legal values for d_tag of Elf64_Dyn.  */
 

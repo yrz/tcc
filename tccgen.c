@@ -955,6 +955,8 @@ void gen_opl(int op)
                 o(0x1A000000 | encbranch(ind, 0, 1));
 #elif defined(TCC_TARGET_C67)
                 error("not implemented");
+#elif defined(TCC_TARGET_MSP430)
+                error("TOK_EQ not implemented");
 #else
 #error not supported
 #endif
@@ -1704,15 +1706,30 @@ static int type_size(CType *type, int *a)
 #endif
         return 8;
     } else if (bt == VT_INT || bt == VT_ENUM || bt == VT_FLOAT) {
+#ifdef TCC_TARGET_MSP430
+        if(bt == VT_INT || bt == VT_ENUM)
+	{
+	    *a = 2;
+	    return 2;
+	} else {
+	    *a = 4;
+	    return 4;
+	}
+#else
         *a = 4;
         return 4;
+#endif
     } else if (bt == VT_SHORT) {
         *a = 2;
         return 2;
     } else {
         /* char, void, function, _Bool */
         *a = 1;
+#ifdef TCC_TARGET_MSP430
+        return 2;
+#else
         return 1;
+#endif
     }
 }
 
